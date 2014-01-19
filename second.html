@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<style type="text/css">
+			canvas
+			{
+				position: fixed;
+				top: 0;
+				left: 0;
+			}
+		</style>
+		<script type="text/javascript" src="js/three.min.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+			var renderer = new THREE.WebGLRenderer({antialias:true});
+			renderer.setSize(width, height);
+			renderer.shadowMapEnabled = true;
+			renderer.shadowMapSoft = true;
+			document.body.appendChild(renderer.domElement);
+
+			var scene = new THREE.Scene();
+
+			//add plate
+			var plate_geo = new THREE.PlaneGeometry(600,600);
+			var plate_mat = new THREE.MeshLambertMaterial({color:0xFEFEFE});
+			var plate = new THREE.Mesh(plate_geo, plate_mat);
+			plate.rotation.x = -Math.PI * 90/180;
+			plate.position.y = -100;
+			plate.receiveShadow = true;
+			scene.add(plate);
+
+			//add sphere
+			var sphere_geo = new THREE.SphereGeometry(20,16,16);
+			var sphere_mat = new THREE.MeshLambertMaterial({color:0xff0000});
+			var sphere = new THREE.Mesh(sphere_geo,sphere_mat);
+			sphere.castShadow = true;
+			sphere.velocity = new THREE.Vector3(0,0,0);
+			scene.add(sphere);
+
+			var camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 10000);
+			camera.position.z = 1000;
+			scene.add(camera);
+
+			var pointLight1 = new THREE.PointLight({color:0xffffff});
+			pointLight1.position.set(500,100,300);
+			scene.add(pointLight1);
+			var pointLight2 = new THREE.PointLight({color:0xffffff});
+			pointLight2.position.set(-500,-100,300);
+			scene.add(pointLight2);
+			var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+			dirLight.position.set(-100,150,0);
+			dirLight.castShadow = true;
+			scene.add(dirLight);
+
+			dt = 0.1;
+			acceleration_x = 0;
+			acceleration_y = -9.8;
+			damping = 0.89;
+
+			function animation(){
+				renderer.render(scene,camera);
+				sphere.position.x += sphere.velocity.x * dt;
+				sphere.position.y += sphere.velocity.y * dt;
+				sphere.velocity.x += acceleration_x * dt;
+				sphere.velocity.y += acceleration_y * dt;
+				if(sphere.position.y-20<=plate.position.y){
+					sphere.velocity.x = -damping*sphere.velocity.x;
+					sphere.velocity.y = -damping*sphere.velocity.y;
+				}
+
+				requestAnimationFrame(animation);
+			}
+			animation();
+		</script>
+	</body>
+</html>
